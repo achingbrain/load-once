@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/achingbrain/load-once.git"
+  },
   "scripts": {
     "test": "NODE_ENV=test mocha",
     "test:coverage": "istanbul --include-all-sources cover _mocha",
@@ -10,7 +14,7 @@
     "lint": "standard",
     "pre-commit": "npm run lint && npm run test:coverage:check"
   },
-  "author": "",
+  "author": "Alex Potsides",
   "license": "ISC",
   "devDependencies": {
     "chai": "^3.0.0",
