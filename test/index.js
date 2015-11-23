@@ -4,7 +4,6 @@ var describe = require('mocha').describe
 var it = require('mocha').it
 var expect = require('chai').expect
 var sinon = require('sinon')
-require('sinon-as-promised')
 var loadOnce = require('../')
 var async = require('async')
 
@@ -41,42 +40,23 @@ describe('load-once', function () {
     })
   })
 
-  it('should only load once with promises', function (done) {
-    if (!global.Promise) {
-      return done()
-    }
-
-    var stub = sinon.stub().resolves(true)
+  it('should load with arguments', function (done) {
+    var stub = sinon.stub().callsArgWithAsync(2, null, true)
     var load = loadOnce(stub)
 
-    load()
-    .then(function () {
+    load(1, 2, function (error) {
+      expect(error).to.not.exist
       expect(stub.calledOnce).to.be.true
 
-      load()
-      .then(function () {
+      load(1, 2, function (err) {
+        expect(err).to.not.exist
         expect(stub.calledOnce).to.be.true
+        expect(stub.getCall(0).args[0]).to.equal(1)
+        expect(stub.getCall(0).args[1]).to.equal(2)
+        expect(stub.getCall(0).args[2]).to.be.a('function')
 
         done()
       })
-    })
-  })
-
-  it('should only load once concurrently with promises', function (done) {
-    if (!global.Promise) {
-      return done()
-    }
-
-    var stub = sinon.stub().resolves({})
-    var load = loadOnce(stub)
-
-    Promise
-    .all([load(), load()])
-    .then(function (results) {
-      expect(stub.calledOnce).to.be.true
-      expect(results[0]).to.equal(results[1])
-
-      done()
     })
   })
 })

@@ -9,45 +9,24 @@ module.exports = function createLoadOnce (load) {
   var loading = false
   var loaded
 
-  return function loadOnce (callback) {
-    if (callback) {
-      if (loaded) {
-        return callback(null, loaded)
-      }
+  return function loadOnce () {
+    var callback = arguments[arguments.length - 1]
 
-      emitter.once('loaded', callback)
+    if (loaded) {
+      return callback(null, loaded)
+    }
 
-      if (!loading) {
-        loading = true
-        load(function finishedLoading (error, result) {
-          loaded = result
-          emitter.emit('loaded', error, loaded)
-        })
-      }
-    } else if (global.Promise) {
-      if (loaded) {
-        return Promise.resolve(loaded)
-      }
+    emitter.once('loaded', callback)
 
-      if (loading) {
-        return new Promise(function (resolve, reject) {
-          emitter.once('loaded', function (result) {
-            resolve(result)
-          })
-        })
-      }
-
+    if (!loading) {
       loading = true
 
-      return new Promise(function (resolve, reject) {
-        load()
-        .then(function (result) {
-          loaded = result
-          emitter.emit('loaded', loaded)
-          resolve(result)
-        })
-        .catch(reject)
-      })
+      arguments[arguments.length - 1] = function finishedLoading (error, result) {
+        loaded = result
+        emitter.emit('loaded', error, loaded)
+      }
+
+      load.apply(null, arguments)
     }
   }
 }
